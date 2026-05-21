@@ -2,35 +2,11 @@
 
 Universal AI/vibe-coding development workflow for Windows.
 
-This repository is not for one project only. It is a reusable workflow system for all projects, including:
-
-- SentinelX
-- Indian algo trading platform
-- Dynamic Bubble website
-- AI/physics research projects
-- future startup/project work
+This repository is not for one project only. It is a reusable workflow system for SentinelX, Indian algo trading platform, Dynamic Bubble website, AI/research projects, and future startup work.
 
 ## Purpose
 
-This repo stores reusable templates, prompts, scripts, and workflow documentation for a multi-agent AI development setup using:
-
-- VS Code
-- PowerShell
-- GitHub
-- Gemini CLI
-- Codex CLI
-- Codex VS Code panel
-- Cline + MCP
-- Ollama
-- Continue.dev
-- GitHub Copilot
-- Playwright
-- n8n
-- pm2
-- git-secrets
-- Infisical
-- Context7
-- Firecrawl
+This repo stores reusable templates, prompts, scripts, and workflow documentation for a multi-agent AI development setup.
 
 ## Main Rule
 
@@ -43,11 +19,7 @@ Do not run Gemini CLI, Codex CLI, Cline, Ollama, n8n, and browser automation tog
 ```text
 ai-workspace/
 ├── docs/
-│   ├── DAILY_WORKFLOW.md
-│   └── RAM_SAFETY.md
 ├── scripts/
-│   ├── start-n8n.cmd
-│   └── stop-heavy-tools.ps1
 ├── templates/
 │   ├── github-actions/
 │   ├── gitignore/
