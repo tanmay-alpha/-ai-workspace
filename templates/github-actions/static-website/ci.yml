@@ -1,0 +1,82 @@
+name: Static Website CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  static-website-checks:
+    name: Static website checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for website files
+        shell: bash
+        run: |
+          echo "Checking for static website files..."
+
+          html_count=$(find . -type f -name "*.html" | wc -l)
+          css_count=$(find . -type f -name "*.css" | wc -l)
+          js_count=$(find . -type f -name "*.js" | wc -l)
+
+          echo "HTML files: $html_count"
+          echo "CSS files: $css_count"
+          echo "JS files: $js_count"
+
+          if [ "$html_count" -eq 0 ]; then
+            echo "No HTML files found. This may not be a static website project."
+            exit 1
+          fi
+
+      - name: Check for common broken placeholders
+        shell: bash
+        run: |
+          echo "Scanning for common placeholder text..."
+
+          if grep -RIn --exclude-dir=.git --exclude-dir=node_modules \
+            "TODO\|Lorem ipsum\|your-email@example.com\|0000000000\|YOUR_API_KEY" .; then
+            echo "Placeholder text found. Review before production."
+            exit 1
+          else
+            echo "No common placeholder text found."
+          fi
+
+      - name: Check for oversized files
+        shell: bash
+        run: |
+          echo "Checking for files larger than 5MB..."
+
+          large_files=$(find . -type f \
+            -not -path "./.git/*" \
+            -not -path "./node_modules/*" \
+            -size +5M)
+
+          if [ -n "$large_files" ]; then
+            echo "Large files found:"
+            echo "$large_files"
+            exit 1
+          else
+            echo "No oversized files found."
+          fi
+
+      - name: Basic link target sanity check
+        shell: bash
+        run: |
+          echo "Checking for empty href/src attributes..."
+
+          if grep -RIn --include="*.html" \
+            'href=""\|src=""\|href="#"\|src="#"' .; then
+            echo "Empty or placeholder href/src attributes found."
+            exit 1
+          else
+            echo "No empty href/src attributes found."
+          fi
