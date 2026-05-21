@@ -1,32 +1,39 @@
 # AI Workspace
 
-Universal AI/vibe-coding development workflow for Windows.
+A reusable AI development workflow system for building, testing, and maintaining multiple software projects with AI agents.
 
-This repository is not for one project only. It is a reusable workflow system for SentinelX, Indian algo trading platform, Dynamic Bubble website, AI/research projects, and future startup work.
+This is not an app or website.  
+This repo is my personal AI engineering command center.
 
-## Purpose
+It helps me quickly apply the same development workflow, CI/CD setup, security checks, prompt templates, and agent rules across different projects.
 
-This repo stores reusable templates, prompts, scripts, and workflow documentation for a multi-agent AI development setup.
+## Why This Exists
 
-## Main Rule
+I work on multiple projects:
 
-Use only one heavy agent at a time.
+- SentinelX
+- Indian algo trading platform
+- Dynamic Bubble website
+- AI/research experiments
+- future startup/product ideas
 
-Do not run Gemini CLI, Codex CLI, Cline, Ollama, n8n, and browser automation together unless absolutely necessary.
+Instead of setting up CI, secret scanning, prompts, gitignore files, and AI agent rules again and again, this repo stores reusable templates and workflows in one place.
 
-## Folder Structure
+## What This Repo Contains
 
 ```text
 ai-workspace/
 ├── docs/
+│   ├── DAILY_WORKFLOW.md
+│   └── RAM_SAFETY.md
 ├── scripts/
+│   └── stop-heavy-tools.ps1
 ├── templates/
 │   ├── github-actions/
 │   ├── gitignore/
 │   ├── mcp-profiles/
 │   └── prompts/
-├── .gitignore
 ├── .env.example
+├── .gitignore
 ├── AI_WORKFLOW_CONTEXT.md
 └── README.md
-```
