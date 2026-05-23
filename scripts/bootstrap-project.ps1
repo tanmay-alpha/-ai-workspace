@@ -1,4 +1,4 @@
-param (
+﻿param (
     [Parameter(Mandatory=$true)]
     [string]$ProjectPath,
 
@@ -14,8 +14,11 @@ param (
 
 $ErrorActionPreference = "Stop"
 
+$WorkspaceRoot = Split-Path -Parent $PSScriptRoot
+
 Write-Host "Bootstrapping project at: $ProjectPath" -Cyan
 Write-Host "Project Type: $ProjectType" -Cyan
+Write-Host "Workspace Root: $WorkspaceRoot" -Cyan
 
 if (-not (Test-Path $ProjectPath)) {
     Write-Host "Creating project directory..."
@@ -28,11 +31,11 @@ if (-not (Test-Path $githubActionsPath)) {
 }
 
 # 1. Copy CI template
-$ciSource = "templates/github-actions/$ProjectType/ci.yml"
+$ciSource = Join-Path $WorkspaceRoot "templates/github-actions/$ProjectType/ci.yml"
 if (Test-Path $ciSource) {
     $ciDest = Join-Path $githubActionsPath "ci.yml"
     if (-not (Test-Path $ciDest) -or $Force) {
-        Write-Host "Copying CI template..."
+        Write-Host "Copying CI template from $ciSource..."
         Copy-Item $ciSource $ciDest -Force
     } else {
         Write-Host "CI template already exists. Use -Force to overwrite." -ForegroundColor Yellow
@@ -48,10 +51,10 @@ $gitignoreSourceMap = @{
 }
 
 if ($gitignoreSourceMap.ContainsKey($ProjectType)) {
-    $gitignoreSource = $gitignoreSourceMap[$ProjectType]
+    $gitignoreSource = Join-Path $WorkspaceRoot $gitignoreSourceMap[$ProjectType]
     $gitignoreDest = Join-Path $ProjectPath ".gitignore"
     if (-not (Test-Path $gitignoreDest) -or $Force) {
-        Write-Host "Copying .gitignore..."
+        Write-Host "Copying .gitignore from $gitignoreSource..."
         Copy-Item $gitignoreSource $gitignoreDest -Force
     } else {
         Write-Host ".gitignore already exists. Use -Force to overwrite." -ForegroundColor Yellow
@@ -60,10 +63,10 @@ if ($gitignoreSourceMap.ContainsKey($ProjectType)) {
 
 # 3. Optional: Secret Scan
 if ($IncludeSecretScan) {
-    $secretScanSource = "templates/github-actions/security/secret-scan.yml"
+    $secretScanSource = Join-Path $WorkspaceRoot "templates/github-actions/security/secret-scan.yml"
     $secretScanDest = Join-Path $githubActionsPath "secret-scan.yml"
     if (-not (Test-Path $secretScanDest) -or $Force) {
-        Write-Host "Copying secret scan workflow..."
+        Write-Host "Copying secret scan workflow from $secretScanSource..."
         Copy-Item $secretScanSource $secretScanDest -Force
     } else {
         Write-Host "Secret scan workflow already exists. Use -Force to overwrite." -ForegroundColor Yellow
@@ -72,10 +75,10 @@ if ($IncludeSecretScan) {
 
 # 4. Optional: Prompts
 if ($IncludePrompts) {
-    $promptsSource = "templates/prompts"
+    $promptsSource = Join-Path $WorkspaceRoot "templates/prompts"
     $promptsDest = Join-Path $ProjectPath "ai-prompts"
     if (-not (Test-Path $promptsDest) -or $Force) {
-        Write-Host "Copying prompt playbooks..."
+        Write-Host "Copying prompt playbooks from $promptsSource..."
         if (Test-Path $promptsDest) { Remove-Item $promptsDest -Recurse -Force }
         Copy-Item $promptsSource $promptsDest -Recurse -Force
     } else {
@@ -92,10 +95,10 @@ if ($IncludeProjectDocs) {
     
     $workflowDocs = @("APPLY_TO_PROJECT.md", "DAILY_WORKFLOW.md", "RAM_SAFETY.md", "VALIDATION.md")
     foreach ($doc in $workflowDocs) {
-        $docSource = "docs/$doc"
+        $docSource = Join-Path $WorkspaceRoot "docs/$doc"
         $docDestPath = Join-Path $docsDest $doc
         if (-not (Test-Path $docDestPath) -or $Force) {
-            Write-Host "Copying $doc..."
+            Write-Host "Copying $doc from $docSource..."
             Copy-Item $docSource $docDestPath -Force
         }
     }
