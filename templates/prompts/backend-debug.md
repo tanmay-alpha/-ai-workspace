@@ -1,63 +1,40 @@
-# Backend Debug Prompt
+# Prompt: Backend Debug
 
-You are debugging this backend as a senior backend engineer.
+> Paste this prompt when debugging a backend issue.
 
-## Main Rule
+---
 
-Find the root cause. Do not randomly rewrite code.
+## Task
 
-## Context
+You are debugging a backend issue in: `[PROJECT_PATH]`
 
-This backend may be part of any project in my universal AI/vibe-coding workflow, including:
+**Error / Symptom:** `[Paste the error message or describe the symptom]`
 
-- FastAPI backend
-- Flask backend
-- Node backend
-- automation service
-- AI/ML API
-- trading/finance backend
-- hackathon backend
+**Environment:** `[local / staging / CI]`
 
-## Debugging Goal
+**Last working commit (if known):** `[commit hash]`
 
-Analyze the issue, identify the root cause, and propose the smallest safe fix.
+## Debug Approach
 
-## Required Workflow
+Follow this order:
+1. **Read the full error message** — do not skip the stack trace.
+2. **Identify the file and line number** where the error originates.
+3. **Read that file** and the files it imports.
+4. **Check recent git changes** to that file: `git log -p --follow <file>`
+5. **Check environment variables** — are required vars set? (Do NOT log secrets)
+6. **Check dependency compatibility** — was anything recently updated?
 
-1. Read the error message carefully.
-2. Identify the failing command, route, test, or module.
-3. Inspect only relevant files first.
-4. Trace the flow from entry point to failure.
-5. Identify whether the issue is:
-   - import error
-   - missing dependency
-   - config/env issue
-   - path issue
-   - schema/model mismatch
-   - async bug
-   - database issue
-   - API contract mismatch
-   - test setup issue
-   - deployment/runtime issue
-6. Propose minimal fix.
-7. Do not change unrelated modules.
-8. Run the smallest relevant validation command.
+## Rules
 
-## Safety Rules
+- Do NOT make changes without explaining what you plan to do first.
+- Do NOT restart services unless explicitly asked.
+- Do NOT modify `.env` files.
+- If the issue is unclear, ask one specific clarifying question.
 
-- Do not ask for real secrets.
-- Do not print `.env` values.
-- Do not hardcode credentials.
-- Do not disable tests to make the build pass.
-- Do not fake backend responses unless explicitly asked for mock/demo mode.
-- Do not create production shortcuts.
+## Output Format
 
-## Useful Commands
-
-For Python:
-
-```powershell
-python -m compileall .
-pytest -q
-python -B -c "import app; print('import ok')"
-```
+1. **Root Cause** (what is the actual cause?)
+2. **Affected Files** (list files involved)
+3. **Fix** (exact code change with diff format)
+4. **Tests to Verify** (how to confirm the fix works)
+5. **Preventative Note** (how to avoid this in the future)

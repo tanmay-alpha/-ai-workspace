@@ -1,0 +1,10 @@
+{
+  "name": "sample-fullstack-frontend",
+  "version": "0.1.0",
+  "description": "Sample fullstack frontend fixture",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Frontend build complete'",
+    "test": "echo 'No tests yet'"
+  }
+}
