@@ -1,0 +1,10 @@
+{
+  "name": "sample-node-frontend",
+  "version": "0.1.0",
+  "description": "Sample Node frontend fixture for ai-workspace testing",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Build complete'",
+    "test": "node test/index.test.js"
+  }
+}

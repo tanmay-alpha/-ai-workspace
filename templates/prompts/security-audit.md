@@ -1,82 +1,54 @@
-# Security Audit Prompt
+# Prompt: Security Audit
 
-You are auditing this repository as a practical application security reviewer.
+> Paste this prompt to perform a security review of a project.
 
-## Scope
+---
 
-Perform a security review focused on real risks, not theoretical noise.
+## Task
 
-## Context
+Perform a security audit of the repository at: `[PROJECT_PATH]`
 
-This repo is part of a universal AI/vibe-coding workflow. Security must work across many project types, including:
+Read `PROJECT_MAP.md` and `AI_WORKFLOW_CONTEXT.md` first.
 
-- Python backend projects
-- Node/React projects
-- full-stack apps
-- static websites
-- AI/ML projects
-- automation projects
-- trading/finance-related projects
+## Audit Checklist
 
-## Audit Areas
+### Credential and Secret Safety
+- [ ] Search all files for patterns: `api_key`, `secret_key`, `password`, `token`, `AWS_ACCESS_KEY`, `private_key`
+- [ ] Verify `.env` is in `.gitignore`
+- [ ] Verify no `.env` files are git-tracked: `git ls-files | grep -i .env`
+- [ ] Check git history for accidentally committed secrets: `git log --all -p | grep -i "api_key\|password\|secret"`
 
-Check for:
+### Input Validation
+- [ ] Are all external inputs (HTTP params, file uploads, form fields) validated server-side?
+- [ ] Are SQL queries parameterized? Search for string formatting in query strings.
+- [ ] Is file upload type and size validated?
 
-1. Secrets committed to the repo
-2. `.env` or local secret files tracked by Git
-3. API keys, tokens, passwords, private keys, or credentials in code
-4. Unsafe frontend environment variables
-5. Hardcoded URLs or tokens
-6. Missing `.env.example`
-7. Weak `.gitignore`
-8. Unsafe logging of sensitive values
-9. Insecure CORS or auth assumptions
-10. Dangerous deployment defaults
-11. Missing secret scanning
-12. Missing dependency or CI checks
+### Authentication and Authorization
+- [ ] Are authentication tokens validated on every protected endpoint?
+- [ ] Are authorization checks present (not just authentication)?
+- [ ] Are there any admin routes not protected by auth?
 
-## Security Rules
+### Dependency Security
+- [ ] Run `pip audit` (Python) or `npm audit` (Node)
+- [ ] Identify any `HIGH` or `CRITICAL` severity findings
+- [ ] Check if packages are pinned to specific versions
 
-- Do not print actual secret values.
-- If a secret is found, redact it as `***REDACTED***`.
-- Do not recommend committing any real credentials.
-- Do not recommend putting backend secrets in frontend public env vars.
-- Do not recommend disabling security checks just to make tests pass.
-- Do not fabricate scan results.
+### CI/CD Security
+- [ ] Does CI require secrets not available to PRs from forks?
+- [ ] Are environment variables masked in logs?
+- [ ] Are CI steps minimal and principle-of-least-privilege?
 
-## Required Checks
-
-If possible, inspect:
-
-- `.gitignore`
-- `.env.example`
-- `.github/workflows`
-- package files
-- requirements files
-- config files
-- backend settings/config modules
-- frontend environment usage
-- logging files
-- deployment config
+### Trading / Financial (if applicable)
+- [ ] Is `TRADING_MODE=PAPER` the default?
+- [ ] Are live broker credentials absent from CI?
+- [ ] Are risk limits validated before order submission?
 
 ## Output Format
 
-Use this format:
+1. **Critical Findings** — must fix immediately
+2. **High Severity** — fix before production
+3. **Medium Severity** — fix before next release
+4. **Low Severity / Hardening** — schedule for backlog
+5. **Recommended Commands** to fix or verify each finding
 
-1. Executive Risk Summary
-2. Critical Issues
-3. High-Risk Issues
-4. Medium-Risk Issues
-5. Low-Risk Issues
-6. Files That Need Changes
-7. Recommended Fix Plan
-8. Commands To Run Locally
-9. Safe Commit Message
-
-## Local Commands To Consider
-
-```powershell
-git status
-git secrets --scan
-git ls-files | Select-String ".env"
-```
+Do NOT make changes. This is a read-only audit.
