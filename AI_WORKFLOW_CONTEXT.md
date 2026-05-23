@@ -1,343 +1,409 @@
-﻿# Universal AI Development Workflow Context
+# AI Workflow Context
 
 ## Purpose
 
-This setup is not for one project only. It is a universal AI/vibe-coding development environment for all projects, including:
+This repository provides a reusable AI-assisted software development workflow.
 
-- SentinelX
-- Indian algo trading platform
-- Dynamic Bubble website
-- AI/physics research projects
-- future startup/project work
+The goal is to organize:
 
-The goal is to build a professional multi-agent AI engineering workflow on Windows using VS Code, PowerShell, Cline, MCP servers, Gemini CLI, Codex CLI, Ollama, GitHub, Infisical, and git-secrets.
+- AI coding workflows
+- CI/CD templates
+- security workflows
+- prompt playbooks
+- MCP usage patterns
+- reusable project templates
+- local development tooling
 
----
+into a single reusable engineering system.
 
-## System
-
-- OS: Windows
-- Main editor: VS Code
-- Terminal: PowerShell / VS Code integrated terminal
-- GitHub username: tanmay-alpha
-- Git name: Tanmay Mangal
-- Git email: mangaltanmay7@gmail.com
-- Main test repo: C:\Users\TANMAY\SentinelX
-- Laptop: HP Omen 14
-- GPU: RTX 4060 8GB
-- CPU: Intel i7-14650HX
-- RAM: 16GB
-- SSD: 1TB
-
-Important constraint:
-The laptop heats and slows when too many agents/models run at the same time. Use only one heavy agent at a time.
+This repository is intended to work across many project types rather than a single codebase.
 
 ---
 
-## Completed Setup
+# Core Workflow Philosophy
 
-### Phase 1 — Git + VS Code Base
+Use the right tool for the right task.
 
-Git global identity configured:
+Different AI systems perform better at different kinds of work:
 
-- user.name = Tanmay Mangal
-- user.email = mangaltanmay7@gmail.com
-- GitHub username = tanmay-alpha
+- large-context analysis
+- implementation
+- debugging
+- documentation lookup
+- filesystem tooling
+- automation
+- local/offline coding
 
-VS Code configured for AI-assisted coding.
-
----
-
-### Phase 2 — Playwright + n8n
-
-Installed:
-
-- Playwright
-- Chromium
-- n8n
-- pm2
-
-Purpose:
-
-- Playwright: browser automation/testing
-- n8n: local automation workflows
-- pm2: local process manager
-
-n8n works at:
-
-http://localhost:5678
-
-Do not keep n8n running all the time if RAM/heat is an issue.
+The workflow separates these responsibilities to reduce confusion, improve reliability, and reduce system overload.
 
 ---
 
-### Phase 3 — AI Coding Stack
+# AI Agent Roles
 
-Installed:
+## Planning / Architecture Assistant
 
-- Ollama
-- qwen2.5-coder:7b
-- deepseek-r1:7b
-- Cline VS Code extension
-- Continue.dev
-- Gemini Code Assist
-- GitHub Copilot
+Recommended for:
 
-Ollama models:
+- architecture review
+- debugging strategy
+- planning
+- workflow design
+- prompt engineering
+- code review discussion
 
-- qwen2.5-coder:7b
-- deepseek-r1:7b
+Avoid using for:
 
-Cline connected to Ollama using:
-
-- Provider: Ollama
-- Base URL: http://localhost:11434
-- Model: qwen2.5-coder:7b
-- API key: empty
-
-Continue.dev configured with local Ollama models.
+- large autonomous repo rewrites
+- uncontrolled code generation
 
 ---
 
-### Phase 4 — Security
+## Large-Context CLI Assistant
 
-Installed and configured:
+Recommended for:
 
-- git-secrets
-- Infisical CLI
+- repository-wide analysis
+- long logs
+- architecture review
+- identifying technical debt
+- planning refactors
 
-git-secrets global secret patterns added for:
-
-- GitHub tokens
-- OpenAI keys
-- Firecrawl keys
-- Google API keys
-- AWS keys
-
-Fake secret scan was tested successfully.
-
-Universal env template created:
-
-C:\Users\TANMAY\ai-workspace\templates\.env.example
-
-SentinelX has:
-
-- .env ignored
-- .env.example committed
-- git-secrets hooks installed
-
-Infisical:
-
-- CLI installed
-- login successful
-- SentinelX linked with .infisical.json
-- TEST_SECRET=hello_from_infisical stored and retrieved successfully
-
-Important:
-Never paste real API keys in chat/screenshots. Regenerate exposed keys.
+Best used before implementation work begins.
 
 ---
 
-### Phase 5 — Cline MCP Server Stack
+## Coding Agent
 
-Cline MCP config path:
+Recommended for:
 
-C:\Users\TANMAY\AppData\Roaming\Code\User\globalStorage\saoudrizwan.claude-dev\settings\cline_mcp_settings.json
+- implementation
+- bug fixing
+- refactoring
+- writing tests
+- terminal workflows
+- safe incremental changes
 
-MCP servers configured and showing green:
+Preferred workflow:
+
+1. inspect code first
+2. explain plan
+3. make minimal changes
+4. validate
+5. summarize changes
+
+---
+
+## IDE Coding Assistant
+
+Recommended for:
+
+- quick editor tasks
+- autocomplete
+- small fixes
+- rapid iteration
+
+Avoid relying on IDE autocomplete for architecture decisions.
+
+---
+
+## MCP / Tool Agent
+
+Recommended for workflows involving:
+
+- filesystem access
+- GitHub operations
+- documentation lookup
+- web research
+- scraping
+- tool orchestration
+- git-aware workflows
+
+Use only the MCP tools needed for the current task.
+
+Avoid enabling unnecessary tools.
+
+---
+
+## Local Models
+
+Recommended for:
+
+- offline work
+- low-cost fallback usage
+- experimentation
+- lightweight coding support
+
+Local models should not replace validation, testing, or architecture review.
+
+---
+
+# Recommended Tool Usage
+
+## Analysis Workflow
+
+Use:
+
+- large-context analysis assistant
+- repository analysis prompts
+- architecture review prompts
+
+Avoid editing code during analysis-only sessions.
+
+---
+
+## Implementation Workflow
+
+Use:
+
+- coding agent
+- IDE assistant
+- terminal workflows
+- incremental commits
+
+Implementation sessions should stay focused on a small number of related tasks.
+
+---
+
+## Documentation Workflow
+
+Use:
+
+- MCP/documentation tools
+- official docs
+- repository notes
+- reusable prompt templates
+
+Avoid relying entirely on memory for framework/library behavior.
+
+---
+
+## Security Workflow
+
+Always:
+
+- ignore `.env`
+- use `.env.example`
+- scan for secrets
+- validate commits before pushing
+
+Never:
+
+- commit credentials
+- expose tokens
+- expose API keys
+- expose private certificates
+- expose production secrets
+
+---
+
+# MCP Usage Strategy
+
+MCP tools should be activated selectively.
+
+Recommended pattern:
+
+## Frontend Projects
+
+Use:
 
 - filesystem
 - github
-- memory
-- sequential-thinking
-- context7
-- firecrawl
+- documentation lookup
 - fetch
-- git-mcp-server
-
-Brave Search MCP skipped because Brave API appeared paid/subscription-based.
-
-Fetch replacement:
-
-- @tokenizin/mcp-npx-fetch
-
-Git MCP replacement:
-
-- @cyanheads/git-mcp-server
-
-GitHub MCP uses:
-
-GITHUB_PERSONAL_ACCESS_TOKEN
-
-not GITHUB_TOKEN.
-
-Firecrawl MCP configured with Firecrawl API key.
-
-Important:
-Firecrawl key was exposed in screenshot once, so regenerate it later.
+- browser/testing tools only when required
 
 ---
 
-### Phase 6 — Gemini CLI
+## Backend Projects
 
-Installed Gemini CLI:
+Use:
 
-@google/gemini-cli
-
-Gemini CLI authenticated with Google account.
-
-Gemini shows:
-
-- Signed in with Google
-- Plan: Gemini Code Assist in Google One AI Pro
-
-Gemini CLI should be used inside VS Code integrated terminal.
-
-Useful Gemini commands:
-
-/ide enable
-/ide status
-
-Gemini role:
-
-- huge repo analysis
-- long logs
-- architecture review
-- second opinion
-- large-context reasoning
+- filesystem
+- github
+- documentation lookup
+- git-aware tools
+- structured reasoning tools when needed
 
 ---
 
-### Codex CLI
+## Research / Exploration Projects
 
-Codex CLI installed and working.
+Use:
 
-It showed:
-
-- OpenAI Codex v0.132.0
-- model: gpt-5.5 xhigh
-- directory: ~\SentinelX
-
-There is also Codex panel inside VS Code.
-
-Important difference:
-
-- Codex VS Code panel = IDE-integrated quick coding tasks
-- Codex CLI = terminal-native autonomous coding agent
-
-Codex should use ChatGPT Plus account if possible:
-
-codex logout
-codex login
-
-Choose:
-
-Sign in with ChatGPT
-
-not API key.
-
-Codex role:
-
-- autonomous implementation
-- repo edits
-- code changes
-- bug fixing
-- terminal coding workflows
+- filesystem
+- fetch
+- scraping/research tools
+- memory tools
+- documentation tools
 
 ---
 
-## Current Workflow Strategy
+## Automation Projects
 
-Use agents by role:
+Use:
 
-| Tool | Role |
-|---|---|
-| ChatGPT | planning, debugging, prompt writing, strategy |
-| Gemini CLI | huge-context repo analysis and architecture |
-| Codex CLI | autonomous terminal coding implementation |
-| Codex VS Code panel | quick IDE coding tasks |
-| Cline + MCP | tool orchestration, docs, scraping, git, filesystem |
-| Ollama | local/free fallback |
-| Continue.dev | local autocomplete |
-| GitHub Copilot | autocomplete/cloud backup |
-| Context7 | latest docs |
-| Firecrawl | scraping/research |
-| git-secrets | secret leak prevention |
-| Infisical | secret vault |
+- filesystem
+- fetch
+- github
+- automation platforms manually when needed
 
 ---
 
-## Fallback Plan When Limits Finish
+# CI/CD Principles
 
-Use this order:
+Every project should ideally include:
 
-1. Gemini CLI for huge analysis
-2. Codex VS Code panel for quick code tasks
-3. Codex CLI for terminal implementation
-4. Cline + MCP for tool-based work
-5. Ollama local models for free fallback
-6. ChatGPT for planning/prompts/debugging
+- automated validation
+- dependency installation
+- test execution
+- linting/formatting where appropriate
+- secret scanning
 
----
+Workflow templates should remain:
 
-## RAM / Heat Rule
+- reusable
+- minimal
+- understandable
+- easy to adapt
 
-Do not run all agents at once.
-
-Recommended lightweight mode:
-
-- VS Code open
-- one agent active only:
-  - Gemini CLI OR Codex CLI OR Cline
-- Ollama off unless needed
-- n8n off unless needed
-- Chrome tabs minimized
-
-Useful commands:
-
-pm2 status
-pm2 stop n8n-local
-
-ollama ps
-ollama stop qwen2.5-coder:7b
-ollama stop deepseek-r1:7b
+Avoid over-engineering CI pipelines early.
 
 ---
 
-## Daily Workflow
+# Repository Template Philosophy
 
-1. Open project in VS Code.
-2. Use Gemini CLI for large analysis.
-3. Use Codex CLI or Codex panel for implementation.
-4. Use Cline + MCP when needing:
-   - filesystem
-   - GitHub
-   - docs
-   - Firecrawl
-   - git operations
-   - sequential planning
-5. Run tests.
-6. Review git diff.
-7. Commit safely.
-8. Push.
+This repository stores reusable templates for:
+
+- GitHub Actions
+- `.gitignore`
+- prompts
+- workflow docs
+- scripts
+- MCP guidance
+
+Templates are intended to accelerate project setup while maintaining consistency.
 
 ---
 
-## Important Instruction For Any AI Agent
+# RAM And System Stability Rules
 
-Do not assume this setup is only for SentinelX. It is universal.
+Use only one heavy AI workflow at a time.
 
-Do not install more tools unless clearly useful.
+Running multiple systems simultaneously can cause:
 
-Prioritize:
-- stability
-- low RAM usage
-- safe secrets
-- project architecture
-- clean git workflow
-- step-by-step execution
+- high RAM usage
+- thermal throttling
+- CPU overload
+- editor lag
+- reduced productivity
+- context confusion
 
-Always ask before making large destructive changes.
+Heavy workloads may include:
 
-Never expose or commit secrets.
+- large-context AI analysis
+- local models
+- browser automation
+- automation servers
+- large editor sessions
 
+---
+
+# Recommended Daily Workflow
+
+## Start Of Session
+
+1. open project
+2. check git status
+3. stop unnecessary tools
+4. determine task scope
+
+---
+
+## Analysis Phase
+
+Use analysis tools to:
+
+- inspect architecture
+- identify issues
+- define implementation plan
+
+Avoid editing during pure analysis sessions.
+
+---
+
+## Implementation Phase
+
+1. make small focused changes
+2. validate locally
+3. inspect git diff
+4. run secret scan
+5. commit incrementally
+
+---
+
+## Validation Phase
+
+Before pushing:
+
+- run tests
+- review changed files
+- inspect secrets
+- confirm workflow status
+
+---
+
+## End Of Session
+
+- stop unnecessary background tools
+- verify clean git state
+- summarize pending tasks
+
+---
+
+# Repository Usage Pattern
+
+Typical workflow:
+
+1. create or open a project
+2. copy required templates
+3. configure CI/CD
+4. configure secret scanning
+5. apply appropriate `.gitignore`
+6. use prompt playbooks for analysis/implementation
+7. validate locally
+8. commit and push
+
+The workflow is intentionally modular.
+
+Projects should adopt only the components they actually need.
+
+---
+
+# Security Principles
+
+Prefer:
+
+- reusable safe templates
+- example environment files
+- minimal permissions
+- incremental validation
+
+Avoid:
+
+- storing secrets in repositories
+- exposing machine-specific sensitive data
+- committing generated credentials
+- enabling unnecessary tooling
+
+---
+
+# Long-Term Goal
+
+Create a reusable, stable, AI-assisted development workflow that can support multiple project types while remaining:
+
+- modular
+- understandable
+- lightweight
+- secure
+- adaptable
+- automation-friendly
