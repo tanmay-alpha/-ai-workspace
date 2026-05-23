@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+
   pull_request:
     branches:
       - main
@@ -40,6 +41,7 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
+
           if [ -n "${{ steps.requirements.outputs.path }}" ]; then
             pip install -r "${{ steps.requirements.outputs.path }}"
           else
@@ -55,8 +57,10 @@ jobs:
       - name: Run tests if present
         shell: bash
         run: |
-          if [ -d "tests" ] || [ -d "backend/tests" ]; then
-            pytest -q
+          if [ -d "tests" ]; then
+            pytest tests -q
+          elif [ -d "backend/tests" ]; then
+            pytest backend/tests -q
           else
-            echo "No tests folder found. Skipping pytest."
+            echo "No tests directory found. Skipping pytest."
           fi

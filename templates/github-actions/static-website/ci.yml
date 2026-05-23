@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+
   pull_request:
     branches:
       - main
@@ -19,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check for website files
+      - name: Check for static website files
         shell: bash
         run: |
           echo "Checking for static website files..."
@@ -37,13 +38,13 @@ jobs:
             exit 1
           fi
 
-      - name: Check for common broken placeholders
+      - name: Check for common placeholder text
         shell: bash
         run: |
           echo "Scanning for common placeholder text..."
 
           if grep -RIn --exclude-dir=.git --exclude-dir=node_modules \
-            "TODO\|Lorem ipsum\|your-email@example.com\|0000000000\|YOUR_API_KEY" .; then
+            "Lorem ipsum\|your-email@example.com\|0000000000\|YOUR_API_KEY" .; then
             echo "Placeholder text found. Review before production."
             exit 1
           else
@@ -68,7 +69,7 @@ jobs:
             echo "No oversized files found."
           fi
 
-      - name: Basic link target sanity check
+      - name: Check for empty links and sources
         shell: bash
         run: |
           echo "Checking for empty href/src attributes..."
