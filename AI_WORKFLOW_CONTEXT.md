@@ -280,8 +280,28 @@ This repository stores reusable templates for:
 - workflow docs
 - scripts
 - MCP guidance
+- coding challenge authoring
 
 Templates are intended to accelerate project setup while maintaining consistency.
+
+---
+
+# Verifiable Coding Challenge Creation
+
+Coding challenge templates should help convert public open-source repository
+tasks into deterministic, reviewable exercises.
+
+Recommended workflow:
+
+1. select a suitable public repository
+2. pin an immutable commit hash
+3. describe expected behavior without prescribing the implementation
+4. add deterministic tests that fail before the solution and pass after it
+5. create a minimal reference solution patch
+6. validate the environment with reproducible Docker or local commands
+7. review final diffs for secrets, private context, and unrelated changes
+
+Keep challenge materials generic, public-friendly, and platform-neutral.
 
 ---
 

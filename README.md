@@ -30,6 +30,13 @@ This repository organizes those pieces into a reusable workflow that can be appl
 - Daily development workflow documentation
 - Utility scripts for local development
 
+## Coding Challenge Authoring
+
+The `templates/challenge-authoring/` folder contains generic templates for
+creating real-world, verifiable coding challenges from open-source repositories.
+It covers repository selection, problem descriptions, deterministic tests,
+reference solution review, Docker environments, and final submission checks.
+
 ## Supported Project Types
 
 This workflow can be adapted for:
