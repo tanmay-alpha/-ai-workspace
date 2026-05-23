@@ -37,3 +37,18 @@ ai-workspace/
 ├── .gitignore
 ├── AI_WORKFLOW_CONTEXT.md
 └── README.md
+## Tech Stack
+
+- VS Code
+- PowerShell
+- GitHub Actions
+- Gemini CLI
+- Codex CLI
+- Cline
+- Ollama
+- Context7 MCP
+- Firecrawl MCP
+- git-secrets
+- Infisical
+- Python
+- Node.js
