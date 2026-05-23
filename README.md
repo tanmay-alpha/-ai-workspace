@@ -16,7 +16,11 @@ Modern development often involves multiple tools: AI coding agents, terminal-bas
 ## Folder Structure
 
 - `docs/`: Core workflow documentation and safety guides.
-- `scripts/`: Utility scripts for workspace management and validation.
+- `scripts/`:
+  - `bootstrap-project.ps1`: Initialize a new project with templates.
+  - `generate-project-map.ps1`: Create a high-level overview of a project.
+  - `stop-heavy-tools.ps1`: Utility to kill resource-intensive processes.
+  - `validate-workspace.ps1`: Ensure the toolkit is healthy.
 - `templates/`:
   - `github-actions/`: CI/CD workflows for various project types.
   - `gitignore/`: Standard gitignore templates.
@@ -36,6 +40,21 @@ See [docs/VALIDATION.md](docs/VALIDATION.md) for more details.
 
 ## How To Apply To A Project
 
+### 1. Bootstrap a New Project
+Use the bootstrap script to automatically set up CI workflows, gitignore, and project documentation:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\bootstrap-project.ps1 -ProjectPath "C:\path\to\new-project" -ProjectType "python-backend" -IncludeSecretScan -IncludeProjectDocs
+```
+
+### 2. Generate a Project Map
+Create a `PROJECT_MAP.md` to help AI agents (and yourself) understand the codebase:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\generate-project-map.ps1 -ProjectPath "C:\path\to\your-project"
+```
+
+### 3. Manual Setup (Optional)
 1. Choose your project type (Python, Node, etc.).
 2. Copy relevant GitHub Actions from `templates/github-actions/`.
 3. Apply standard `.gitignore` from `templates/gitignore/`.
