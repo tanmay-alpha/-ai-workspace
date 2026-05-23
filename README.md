@@ -1,70 +1,60 @@
 # AI Workspace
 
-A reusable AI-assisted development workflow system for building, testing, reviewing, and maintaining software projects.
-
-This repository is not an application or a deployed website.  
-It is a developer workflow toolkit containing reusable templates, prompts, scripts, and documentation for AI-assisted software engineering.
+A polished, public-friendly, reusable AI-assisted development workflow toolkit for building, testing, reviewing, and maintaining software projects.
 
 ## Purpose
 
-Modern development often involves multiple tools:
+Modern development often involves multiple tools: AI coding agents, terminal-based assistants, CI/CD workflows, and automation. This repository organizes these pieces into a reusable system that can be applied to any project type.
 
-- AI coding agents
-- terminal-based assistants
-- IDE extensions
-- CI/CD workflows
-- secret scanning
-- documentation workflows
-- automation tools
+## Tech Stack
 
-This repository organizes those pieces into a reusable workflow that can be applied to many project types.
+- **CI/CD:** GitHub Actions
+- **Scripting:** PowerShell / Bash
+- **Documentation:** Markdown
+- **AI Tooling:** MCP (Model Context Protocol), Prompt Engineering
 
-## What This Repo Provides
+## Folder Structure
 
-- GitHub Actions workflow templates
-- Secret scanning workflow templates
-- Reusable `.gitignore` templates
-- AI prompt playbooks
-- MCP/tooling workflow notes
-- RAM and system safety guidelines
-- Daily development workflow documentation
-- Utility scripts for local development
+- `docs/`: Core workflow documentation and safety guides.
+- `scripts/`: Utility scripts for workspace management and validation.
+- `templates/`:
+  - `github-actions/`: CI/CD workflows for various project types.
+  - `gitignore/`: Standard gitignore templates.
+  - `mcp-profiles/`: Configurations for AI tool agents.
+  - `prompts/`: Reusable prompt playbooks for analysis and implementation.
+  - `challenge-authoring/`: Workflows for creating verifiable coding challenges.
+
+## Validate This Workspace
+
+To ensure the toolkit is healthy and secure, run the validation script:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\validate-workspace.ps1
+```
+
+See [docs/VALIDATION.md](docs/VALIDATION.md) for more details.
+
+## How To Apply To A Project
+
+1. Choose your project type (Python, Node, etc.).
+2. Copy relevant GitHub Actions from `templates/github-actions/`.
+3. Apply standard `.gitignore` from `templates/gitignore/`.
+4. Setup secret scanning.
+5. Follow the [docs/APPLY_TO_PROJECT.md](docs/APPLY_TO_PROJECT.md) guide for a full walkthrough.
 
 ## Coding Challenge Authoring
 
-The `templates/challenge-authoring/` folder contains generic templates for
-creating real-world, verifiable coding challenges from open-source repositories.
-It covers repository selection, problem descriptions, deterministic tests,
-reference solution review, Docker environments, and final submission checks.
+The `templates/challenge-authoring/` folder provides a structured way to create verifiable, deterministic coding challenges from existing repositories. This is ideal for technical interviews, skill assessments, or educational content.
 
-## Supported Project Types
+## Security Rules
 
-This workflow can be adapted for:
+- **No Secrets:** Never commit API keys, tokens, or production credentials.
+- **Scan Often:** Use the included secret-scanning workflows.
+- **Generic Examples:** Keep all public-facing documentation generic.
 
-- Python backend projects
-- Node.js / frontend projects
-- full-stack applications
-- static websites
-- automation projects
-- research or prototype repositories
-- CLI tools
-- internal developer tooling
+## Daily Workflow
 
-## Repository Structure
-
-```text
-ai-workspace/
-├── docs/
-│   ├── DAILY_WORKFLOW.md
-│   └── RAM_SAFETY.md
-├── scripts/
-│   └── stop-heavy-tools.ps1
-├── templates/
-│   ├── github-actions/
-│   ├── gitignore/
-│   ├── mcp-profiles/
-│   └── prompts/
-├── .env.example
-├── .gitignore
-├── AI_WORKFLOW_CONTEXT.md
-└── README.md
+1. Determine task scope.
+2. Use one heavy AI agent at a time.
+3. Validate changes locally before pushing.
+4. See [docs/DAILY_WORKFLOW.md](docs/DAILY_WORKFLOW.md) for the full checklist.

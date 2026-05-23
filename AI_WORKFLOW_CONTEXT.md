@@ -2,428 +2,64 @@
 
 ## Purpose
 
-This repository provides a reusable AI-assisted software development workflow.
-
-The goal is to organize:
-
-- AI coding workflows
-- CI/CD templates
-- security workflows
-- prompt playbooks
-- MCP usage patterns
-- reusable project templates
-- local development tooling
-
-into a single reusable engineering system.
-
-This repository is intended to work across many project types rather than a single codebase.
+This repository provides a reusable AI-assisted software development workflow. The goal is to organize AI coding workflows, CI/CD templates, and prompt playbooks into a single, modular engineering system.
 
 ---
 
 # Core Workflow Philosophy
 
-Use the right tool for the right task.
-
-Different AI systems perform better at different kinds of work:
-
-- large-context analysis
-- implementation
-- debugging
-- documentation lookup
-- filesystem tooling
-- automation
-- local/offline coding
-
-The workflow separates these responsibilities to reduce confusion, improve reliability, and reduce system overload.
+1. **Agent Role Separation:** Use the right tool for the right task (Analysis vs. Implementation).
+2. **One-Heavy-Agent-at-a-Time:** Prevent system overload and context confusion by running only one intensive AI process.
+3. **Validation First:** Always validate the workspace and code locally before applying changes or pushing to remote.
+4. **Public-Friendly Security:** Rigorously avoid committing secrets and personal data.
 
 ---
 
 # AI Agent Roles
 
 ## Planning / Architecture Assistant
-
-Recommended for:
-
-- architecture review
-- debugging strategy
-- planning
-- workflow design
-- prompt engineering
-- code review discussion
-
-Avoid using for:
-
-- large autonomous repo rewrites
-- uncontrolled code generation
-
----
+Focused on high-level design, review, and strategy. Best for architecture discussions and debugging plans.
 
 ## Large-Context CLI Assistant
+Excellent for repository-wide analysis, log processing, and identifying technical debt across many files.
 
-Recommended for:
+## Coding Agent (Implementation)
+Handles the "heavy lifting" of writing code, refactoring, and adding tests. Operates on a Plan -> Act -> Validate cycle.
 
-- repository-wide analysis
-- long logs
-- architecture review
-- identifying technical debt
-- planning refactors
-
-Best used before implementation work begins.
+## Tool / MCP Agent
+Specialized in filesystem access, GitHub operations, documentation lookup, and web research using the Model Context Protocol.
 
 ---
 
-## Coding Agent
+# Project Application Workflow
 
-Recommended for:
-
-- implementation
-- bug fixing
-- refactoring
-- writing tests
-- terminal workflows
-- safe incremental changes
-
-Preferred workflow:
-
-1. inspect code first
-2. explain plan
-3. make minimal changes
-4. validate
-5. summarize changes
+Before applying this toolkit to a new project:
+1. **Run Validation:** Ensure the source toolkit is clean using `scripts/validate-workspace.ps1`.
+2. **Select Components:** Choose only the templates (CI, gitignore, prompts) needed for the target project.
+3. **Configure Locally:** Update environment variables using `.env.example`.
+4. **Final Check:** Run a secret scan on the target project after applying templates.
 
 ---
 
-## IDE Coding Assistant
-
-Recommended for:
-
-- quick editor tasks
-- autocomplete
-- small fixes
-- rapid iteration
-
-Avoid relying on IDE autocomplete for architecture decisions.
-
----
-
-## MCP / Tool Agent
-
-Recommended for workflows involving:
-
-- filesystem access
-- GitHub operations
-- documentation lookup
-- web research
-- scraping
-- tool orchestration
-- git-aware workflows
-
-Use only the MCP tools needed for the current task.
-
-Avoid enabling unnecessary tools.
-
----
-
-## Local Models
-
-Recommended for:
-
-- offline work
-- low-cost fallback usage
-- experimentation
-- lightweight coding support
-
-Local models should not replace validation, testing, or architecture review.
-
----
-
-# Recommended Tool Usage
-
-## Analysis Workflow
-
-Use:
-
-- large-context analysis assistant
-- repository analysis prompts
-- architecture review prompts
-
-Avoid editing code during analysis-only sessions.
-
----
-
-## Implementation Workflow
-
-Use:
-
-- coding agent
-- IDE assistant
-- terminal workflows
-- incremental commits
-
-Implementation sessions should stay focused on a small number of related tasks.
-
----
-
-## Documentation Workflow
-
-Use:
-
-- MCP/documentation tools
-- official docs
-- repository notes
-- reusable prompt templates
-
-Avoid relying entirely on memory for framework/library behavior.
-
----
-
-## Security Workflow
-
-Always:
-
-- ignore `.env`
-- use `.env.example`
-- scan for secrets
-- validate commits before pushing
-
-Never:
-
-- commit credentials
-- expose tokens
-- expose API keys
-- expose private certificates
-- expose production secrets
-
----
-
-# MCP Usage Strategy
-
-MCP tools should be activated selectively.
-
-Recommended pattern:
-
-## Frontend Projects
-
-Use:
-
-- filesystem
-- github
-- documentation lookup
-- fetch
-- browser/testing tools only when required
-
----
-
-## Backend Projects
-
-Use:
-
-- filesystem
-- github
-- documentation lookup
-- git-aware tools
-- structured reasoning tools when needed
-
----
-
-## Research / Exploration Projects
-
-Use:
-
-- filesystem
-- fetch
-- scraping/research tools
-- memory tools
-- documentation tools
-
----
-
-## Automation Projects
-
-Use:
-
-- filesystem
-- fetch
-- github
-- automation platforms manually when needed
-
----
-
-# CI/CD Principles
-
-Every project should ideally include:
-
-- automated validation
-- dependency installation
-- test execution
-- linting/formatting where appropriate
-- secret scanning
-
-Workflow templates should remain:
-
-- reusable
-- minimal
-- understandable
-- easy to adapt
-
-Avoid over-engineering CI pipelines early.
-
----
-
-# Repository Template Philosophy
-
-This repository stores reusable templates for:
-
-- GitHub Actions
-- `.gitignore`
-- prompts
-- workflow docs
-- scripts
-- MCP guidance
-- coding challenge authoring
-
-Templates are intended to accelerate project setup while maintaining consistency.
-
----
-
-# Verifiable Coding Challenge Creation
-
-Coding challenge templates should help convert public open-source repository
-tasks into deterministic, reviewable exercises.
-
-Recommended workflow:
-
-1. select a suitable public repository
-2. pin an immutable commit hash
-3. describe expected behavior without prescribing the implementation
-4. add deterministic tests that fail before the solution and pass after it
-5. create a minimal reference solution patch
-6. validate the environment with reproducible Docker or local commands
-7. review final diffs for secrets, private context, and unrelated changes
-
-Keep challenge materials generic, public-friendly, and platform-neutral.
-
----
-
-# RAM And System Stability Rules
-
-Use only one heavy AI workflow at a time.
-
-Running multiple systems simultaneously can cause:
-
-- high RAM usage
-- thermal throttling
-- CPU overload
-- editor lag
-- reduced productivity
-- context confusion
-
-Heavy workloads may include:
-
-- large-context AI analysis
-- local models
-- browser automation
-- automation servers
-- large editor sessions
-
----
-
-# Recommended Daily Workflow
-
-## Start Of Session
-
-1. open project
-2. check git status
-3. stop unnecessary tools
-4. determine task scope
-
----
-
-## Analysis Phase
-
-Use analysis tools to:
-
-- inspect architecture
-- identify issues
-- define implementation plan
-
-Avoid editing during pure analysis sessions.
-
----
-
-## Implementation Phase
-
-1. make small focused changes
-2. validate locally
-3. inspect git diff
-4. run secret scan
-5. commit incrementally
-
----
-
-## Validation Phase
-
-Before pushing:
-
-- run tests
-- review changed files
-- inspect secrets
-- confirm workflow status
-
----
-
-## End Of Session
-
-- stop unnecessary background tools
-- verify clean git state
-- summarize pending tasks
-
----
-
-# Repository Usage Pattern
-
-Typical workflow:
-
-1. create or open a project
-2. copy required templates
-3. configure CI/CD
-4. configure secret scanning
-5. apply appropriate `.gitignore`
-6. use prompt playbooks for analysis/implementation
-7. validate locally
-8. commit and push
-
-The workflow is intentionally modular.
-
-Projects should adopt only the components they actually need.
+# Verifiable Coding Challenge Authoring
+
+The challenge authoring workflow converts repository tasks into deterministic exercises.
+1. **Pin Commit:** Use an immutable commit hash.
+2. **Deterministic Tests:** Ensure tests fail without the fix and pass with it.
+3. **Reference Solution:** Create a minimal, clean patch for verification.
+4. **Sanitize:** Remove all private context and internal details before publishing.
 
 ---
 
 # Security Principles
 
-Prefer:
-
-- reusable safe templates
-- example environment files
-- minimal permissions
-- incremental validation
-
-Avoid:
-
-- storing secrets in repositories
-- exposing machine-specific sensitive data
-- committing generated credentials
-- enabling unnecessary tooling
+- **Ignore `.env`:** Never track environment files with real secrets.
+- **Use Examples:** Provide `.env.example` with generic placeholders.
+- **Scan Workflows:** Mandatory secret scanning in CI/CD.
+- **Minimalism:** Enable only the tools and permissions required for the current task.
 
 ---
 
-# Long-Term Goal
+# Stability Rules
 
-Create a reusable, stable, AI-assisted development workflow that can support multiple project types while remaining:
-
-- modular
-- understandable
-- lightweight
-- secure
-- adaptable
-- automation-friendly
+Running multiple large-context models or automation servers simultaneously can cause RAM exhaustion and CPU throttling. Always stop background tools when switching between intensive tasks.

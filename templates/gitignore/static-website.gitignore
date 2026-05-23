@@ -1,0 +1,7 @@
+# Static Website .gitignore template
+.env
+dist/
+build/
+.cache/
+.DS_Store
+Thumbs.db

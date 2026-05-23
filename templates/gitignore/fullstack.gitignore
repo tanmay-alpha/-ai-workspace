@@ -1,0 +1,13 @@
+# Fullstack .gitignore template (Python + Node)
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+env/
+dist/
+build/
+.env
+*.env.*
+.pytest_cache/
+.next/
+out/
