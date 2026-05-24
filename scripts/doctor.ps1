@@ -66,7 +66,8 @@ $coreScripts = @(
     'scripts\rollback-ai-workspace.ps1',
     'scripts\new-project.ps1',
     'scripts\validate-workspace.ps1',
-    'scripts\stop-heavy-tools.ps1'
+    'scripts\stop-heavy-tools.ps1',
+    'scripts\presets.json'
 )
 foreach ($s in $coreScripts) {
     $ok = Test-WS $s

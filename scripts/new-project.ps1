@@ -24,8 +24,16 @@ param (
 
     [string]$ProjectName = '',
 
-    [ValidateSet('python-backend','node-frontend','fullstack','static-website',
-                 'ml-project','agentic-ai','trading-system')]
+    [ValidateScript({
+        $jsonPath = Join-Path $PSScriptRoot "presets.json"
+        if (-not (Test-Path $jsonPath)) {
+            $canonical = @('unknown', 'python-backend', 'node-frontend', 'fullstack', 'static-website', 'ml-project', 'agentic-ai', 'trading-system', 'data-science')
+        } else {
+            $canonical = Get-Content $jsonPath -Raw | ConvertFrom-Json
+        }
+        if ($_ -in $canonical) { return $true }
+        throw "Invalid preset '$_'. Valid presets are: $($canonical -join ', ')"
+    })]
     [string]$Preset = 'python-backend',
 
     [switch]$DryRun,

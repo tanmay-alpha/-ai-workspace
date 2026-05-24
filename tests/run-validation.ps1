@@ -193,6 +193,25 @@ Test-Step "Public-Safety Scan" {
     }
 }
 
+# 12. Verify Preset Synchronization
+Test-Step "Verify Preset Synchronization" {
+    # Test valid preset python-backend succeeds
+    $res1 = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\apply-ai-workspace.ps1") -ScriptArgs @("-Preset", "python-backend", "-DryRun")
+    Assert-Equal $res1.ExitCode 0 "apply-ai-workspace.ps1 -Preset python-backend should succeed"
+
+    # Test invalid preset fails parameter validation
+    $res2 = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\apply-ai-workspace.ps1") -ScriptArgs @("-Preset", "invalid-preset-xyz")
+    Assert-Contains $res2.Output "Cannot validate argument on parameter 'Preset'" "apply-ai-workspace.ps1 should throw validation error for invalid preset"
+
+    # Test generate-ci.ps1 with invalid preset
+    $res3 = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\generate-ci.ps1") -ScriptArgs @("-Preset", "invalid-preset-xyz")
+    Assert-Contains $res3.Output "Cannot validate argument on parameter 'Preset'" "generate-ci.ps1 should throw validation error for invalid preset"
+
+    # Test new-project.ps1 with invalid preset
+    $res4 = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\new-project.ps1") -ScriptArgs @("-Preset", "invalid-preset-xyz")
+    Assert-Contains $res4.Output "Cannot validate argument on parameter 'Preset'" "new-project.ps1 should throw validation error for invalid preset"
+}
+
 # --- summary --------------------------------------------------------------------
 Write-Host ''
 Write-Host '==================================================' -ForegroundColor Cyan

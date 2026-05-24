@@ -101,6 +101,7 @@ $requiredFiles = @(
     'scripts\new-project.ps1',
     'scripts\validate-workspace.ps1',
     'scripts\stop-heavy-tools.ps1',
+    'scripts\presets.json',
     'templates\project-docs\PRD.md',
     'templates\project-docs\ROADMAP.md',
     'templates\agent-rules\AGENTS.md',
