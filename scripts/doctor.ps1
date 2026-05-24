@@ -178,6 +178,10 @@ if ($ProjectPath) {
         # tests
         $hasTests = (Test-Path (Join-Path $ProjectPath 'tests')) -or
                     (Test-Path (Join-Path $ProjectPath 'test'))  -or
+                    (Test-Path (Join-Path $ProjectPath 'backend\tests')) -or
+                    (Test-Path (Join-Path $ProjectPath 'backend\test'))  -or
+                    (Test-Path (Join-Path $ProjectPath 'frontend\tests')) -or
+                    (Test-Path (Join-Path $ProjectPath 'frontend\test'))  -or
                     (Test-Path (Join-Path $ProjectPath '__tests__'))
         Add-Check 'Project' 'Tests directory' $(if ($hasTests) { 'PASS' } else { 'WARN' }) $(if (-not $hasTests) { 'No tests/ found - add tests' } else { '' })
 

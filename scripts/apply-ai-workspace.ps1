@@ -150,6 +150,12 @@ Write-Host 'Detecting project type...' -ForegroundColor Cyan
 $detection = & $DetectScript -ProjectPath $ProjectPath -Json | ConvertFrom-Json
 Write-Host "Detected type  : $($detection.ProjectType)" -ForegroundColor Yellow
 Write-Host "Preset         : $($detection.RecommendedPreset)" -ForegroundColor Yellow
+Write-Host "Domain Hints   : $($detection.DomainHints -join ', ')" -ForegroundColor Yellow
+Write-Host "Confidence     : $($detection.Confidence)" -ForegroundColor Yellow
+Write-Host "Evidence       :" -ForegroundColor Yellow
+foreach ($ev in $detection.DetectionEvidence) {
+    Write-Host "  - $ev" -ForegroundColor Gray
+}
 Write-Host ''
 
 if ($detection.EnvFilesTracked) {

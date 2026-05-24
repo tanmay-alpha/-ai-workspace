@@ -6,8 +6,12 @@
 
 ## Detection Overview
 
-`detect-project.ps1` analyzes a project directory and classifies it into one of the following types.
-Detection uses file presence and keyword search — no execution required.
+`detect-project.ps1` analyzes a project directory using a two-tier classification system:
+
+1. **Project Type (Stack-Oriented)**: Identifies the technical architecture of the codebase (e.g. `python-backend`, `node-frontend`, `fullstack`, `static-website`, `ml-project`, `agentic-ai`, `data-science`, `unknown`).
+2. **Domain Hints (Domain-Oriented)**: Identifies domain-specific domains such as `trading`, `cybersecurity`, `fraud`, `finance`, `ml`, `agentic`, `data`, `automation`, and `research`. A domain hint (such as `trading`) is only activated when evidence is strong and multiple indicators are found, avoiding domain misclassification for general apps.
+
+Detection uses file presence, folder layout, and keyword search — no execution required.
 
 ---
 

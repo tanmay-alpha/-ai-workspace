@@ -4,11 +4,14 @@
 
 $ErrorActionPreference = 'Continue'   # don't stop on child process errors
 
-$RepoRoot         = Resolve-Path (Join-Path $PSScriptRoot "..")
-$FixturesRoot     = Join-Path $RepoRoot "tests\fixtures"
-$PythonFixture    = Join-Path $FixturesRoot "sample-python-backend"
-$NodeFixture      = Join-Path $FixturesRoot "sample-node-frontend"
-$FullstackFixture = Join-Path $FixturesRoot "sample-fullstack"
+$RepoRoot            = Resolve-Path (Join-Path $PSScriptRoot "..")
+$FixturesRoot        = Join-Path $RepoRoot "tests\fixtures"
+$PythonFixture       = Join-Path $FixturesRoot "sample-python-backend"
+$NodeFixture         = Join-Path $FixturesRoot "sample-node-frontend"
+$FullstackFixture    = Join-Path $FixturesRoot "sample-fullstack"
+$FastAPIFixture      = Join-Path $FixturesRoot "sample-fastapi-backend"
+$FraudFixture        = Join-Path $FixturesRoot "sample-fraud-backend"
+$TradingFixture      = Join-Path $FixturesRoot "sample-trading-backend"
 
 $results = [System.Collections.Generic.List[PSCustomObject]]::new()
 
@@ -57,6 +60,12 @@ function Assert-Contains($text, $substring, $message) {
     }
 }
 
+function Assert-NotContains($text, $substring, $message) {
+    if ($text -like "*$substring*") {
+        throw "Assertion Failed: $message (Expected NOT to contain '$substring')"
+    }
+}
+
 # --- tests ----------------------------------------------------------------------
 
 $DetectScript = Join-Path $RepoRoot "scripts\detect-project.ps1"
@@ -88,34 +97,60 @@ Test-Step "Detect Project - Fullstack" {
     Assert-Equal $result.ProjectType "fullstack" "Should detect fullstack"
 }
 
-# 4. Generate Project Map - NoWrite
+# 4. Detect FastAPI Backend
+Test-Step "Detect Project - FastAPI Backend" {
+    $json = & $DetectScript -ProjectPath $FastAPIFixture -Json
+    $result = $json | ConvertFrom-Json
+    Assert-Equal $result.ProjectType "python-backend" "Should detect python-backend for FastAPI"
+    Assert-Contains ($result.DetectionEvidence -join " ") "FastAPI" "Evidence should mention FastAPI"
+}
+
+# 5. Detect Fraud Backend (SentinelX-like)
+Test-Step "Detect Project - Fraud Backend" {
+    $json = & $DetectScript -ProjectPath $FraudFixture -Json
+    $result = $json | ConvertFrom-Json
+    Assert-Equal $result.ProjectType "python-backend" "Should detect python-backend for Fraud backend"
+    Assert-Equal $result.HasTradingHints $false "Should NOT have trading hints"
+    Assert-Contains ($result.DomainHints -join " ") "fraud" "Domain hints should include fraud"
+}
+
+# 6. Detect Trading Backend
+Test-Step "Detect Project - Trading Backend" {
+    $json = & $DetectScript -ProjectPath $TradingFixture -Json
+    $result = $json | ConvertFrom-Json
+    Assert-Equal $result.ProjectType "python-backend" "Should detect python-backend for Trading backend"
+    Assert-Equal $result.HasTradingHints $true "Should have trading hints due to strong broker evidence"
+    Assert-Contains ($result.DomainHints -join " ") "trading" "Domain hints should include trading"
+}
+
+# 7. Generate Project Map - NoWrite
 Test-Step "Generate Project Map - NoWrite" {
     $output = & $MapScript -ProjectPath $PythonFixture -NoWrite
     $outputText = Join-Output $output
     Assert-Contains $outputText "# Project Map" "Output should contain '# Project Map' heading"
 }
 
-# 5. Generate CI - DryRun
+# 8. Generate CI - DryRun
 Test-Step "Generate CI - DryRun" {
     $output = & $CIScript -ProjectPath $PythonFixture -DryRun
     $outputText = Join-Output $output
     Assert-Contains $outputText "name: Universal CI" "Output should contain generated YAML header"
 }
 
-# 6. Validate Workspace Script
+# 9. Validate Workspace Script
 Test-Step "Validate Workspace Script" {
     $res = Invoke-PS1 -File $ValidateWS
     Assert-Equal $res.ExitCode 0 "validate-workspace.ps1 should exit with 0"
     Assert-Contains $res.Output "Workspace validation passed!" "Should report validation passed"
 }
 
-# 7. Doctor Script
+# 10. Doctor Script
 Test-Step "Doctor Script" {
     $res = Invoke-PS1 -File $DoctorScript
     Assert-Equal $res.ExitCode 0 "doctor.ps1 should exit with 0"
 }
 
-# 8. Public-Safety Scan
+# 11. Public-Safety Scan
 Test-Step "Public-Safety Scan" {
     $forbiddenWords = @(
         ("TAN" + "MAY"),
@@ -128,7 +163,7 @@ Test-Step "Public-Safety Scan" {
     $filesToScan = Get-ChildItem -Path $RepoRoot -File -Recurse -ErrorAction SilentlyContinue |
         Where-Object {
             $fullName = $_.FullName
-            $fullName -notmatch '\\.git|node_modules|venv|\.venv|__pycache__|dist|build|\.next|\.pytest_cache|\.ruff_cache|\.mypy_cache|\.tox' -and
+            $fullName -notmatch '\\.git|node_modules|venv|\.venv|__pycache__|dist|build|\.next|\.pytest_cache|\.ruff_cache|\.mypy_cache|\.tox|\.ai-workspace-backup' -and
             $_.Name -ne 'validate-workspace.ps1' -and
             $_.Name -ne 'run-validation.ps1'
         }

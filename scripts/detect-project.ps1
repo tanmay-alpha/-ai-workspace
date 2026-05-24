@@ -31,7 +31,7 @@ $ProjectPath = (Resolve-Path $ProjectPath).Path
 
 # --- helpers ------------------------------------------------------------------
 function Test-Exists([string]$rel) {
-    Test-Path (Join-Path $ProjectPath $rel)
+    return Test-Path (Join-Path $ProjectPath $rel)
 }
 
 function Get-FileContent([string]$rel) {
@@ -40,20 +40,104 @@ function Get-FileContent([string]$rel) {
     return ''
 }
 
-function Search-Content([string[]]$keywords, [string[]]$extensions) {
+# --- domain and evidence classification ---------------------------------------
+function Get-DomainHintsAndEvidence {
+    $matched = @{}
+    $evidence = [System.Collections.Generic.List[string]]::new()
+
+    $domains = @{
+        'trading' = @('angel', 'smartapi', 'zerodha', 'kiteconnect', 'upstox', 'fyers', 'aliceblue', 'dhan',
+                      'ohlcv', 'candle', 'tick', 'instrument token', 'order placement', 'paper trading',
+                      'live trading', 'TRADING_MODE', 'KITE_API', 'fyers_api')
+        'cybersecurity' = @('cybersecurity', 'docshield', 'sentinel', 'abuse', 'phish', 'threat',
+                             'exploit', 'vulnerability', 'firewall', 'malware', 'antivirus', 'sandbox')
+        'fraud' = @('fraud', 'risk', 'phish', 'detector', 'scam', 'metadata', 'analytics', 'audit')
+        'ml' = @('sklearn', 'torch', 'pytorch', 'tensorflow', 'keras', 'xgboost', 'lightgbm', 'pandas',
+                 'numpy', 'huggingface', 'transformers', 'dataframe', 'model', 'dataset')
+        'agentic' = @('langchain', 'crewai', 'autogen', 'llm', 'agent', 'planner', 'tool_call',
+                      'function_call', 'embeddings', 'rag', 'vectorstore', 'mcp')
+        'finance' = @('billing', 'invoice', 'checkout', 'stripe', 'payment', 'transaction')
+        'automation' = @('cron', 'schedule', 'worker', 'playbook', 'ansible')
+        'research' = @('academic', 'thesis', 'latex', 'notebook', 'publication')
+    }
+
+    foreach ($d in $domains.Keys) {
+        $matched[$d] = [System.Collections.Generic.List[string]]::new()
+    }
+
+    # 1. Scan file contents
+    $extensions = @('py', 'js', 'ts', 'txt', 'toml', 'json', 'md', 'ipynb')
     foreach ($ext in $extensions) {
         $files = Get-ChildItem -Path $ProjectPath -Filter "*.$ext" -Recurse -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -notmatch '\\.git|node_modules|venv|\.venv|__pycache__|dist|build|\.next|\.pytest_cache|\.ruff_cache|\.mypy_cache|\.tox|\.nuxt|htmlcov' }
+            Where-Object { $_.FullName -notmatch '\\.git|node_modules|venv|\.venv|__pycache__|dist|build|\.next|\.pytest_cache|\.ruff_cache|\.mypy_cache|\.tox|\.nuxt|htmlcov|\.ai-workspace-backup' }
         foreach ($file in $files) {
             $content = Get-Content $file.FullName -Raw -ErrorAction SilentlyContinue
             if ($content) {
-                foreach ($kw in $keywords) {
-                    if ($content -imatch $kw) { return $true }
+                foreach ($d in $domains.Keys) {
+                    foreach ($kw in $domains[$d]) {
+                        $pattern = if ($kw -match '^[a-zA-Z0-9_]+$') { "\b$kw\b" } else { [regex]::Escape($kw) }
+                        if ($content -match $pattern) {
+                            if ($matched[$d] -notcontains $kw) {
+                                $matched[$d].Add($kw)
+                                $evidence.Add("Matched keyword '$kw' in $(Split-Path $file.FullName -Leaf)")
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-    return $false
+
+    # 2. Check for folder/module structure evidence
+    $tradingFolders = @('strategy', 'execution', 'portfolio', 'market_data', 'broker', 'gateway', 'candles')
+    $hasTradingFolder = $false
+    $foundFolders = Get-ChildItem -Path $ProjectPath -Directory -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch '\\.git|node_modules|venv|\.venv|__pycache__|dist|build|\.next|\.pytest_cache|\.ruff_cache|\.mypy_cache|\.tox|\.nuxt|htmlcov|\.ai-workspace-backup' }
+    foreach ($f in $foundFolders) {
+        if ($f.Name -in $tradingFolders) {
+            $hasTradingFolder = $true
+            $evidence.Add("Found trading directory structure: $($f.Name)")
+        }
+    }
+
+    # 3. Analyze trading points
+    $tradingPoints = 0
+    $brokers = @('angel', 'smartapi', 'zerodha', 'kiteconnect', 'upstox', 'fyers', 'aliceblue', 'dhan')
+    $terms   = @('ohlcv', 'candle', 'tick', 'instrument token', 'order placement', 'paper trading', 'live trading')
+    $configs = @('TRADING_MODE', 'KITE_API', 'fyers_api')
+
+    $hasBroker = $false
+    foreach ($b in $brokers) { if ($matched['trading'] -contains $b) { $hasBroker = $true; break } }
+    if ($hasBroker) { $tradingPoints++ }
+
+    $hasTerm = $false
+    foreach ($t in $terms) { if ($matched['trading'] -contains $t) { $hasTerm = $true; break } }
+    if ($hasTerm) { $tradingPoints++ }
+
+    $hasConfig = $false
+    foreach ($c in $configs) { if ($matched['trading'] -contains $c) { $hasConfig = $true; break } }
+    if ($hasConfig) { $tradingPoints++ }
+
+    if ($hasTradingFolder) { $tradingPoints++ }
+
+    $isTrading = ($tradingPoints -ge 2)
+
+    # 4. Compile final lists
+    $finalHints = [System.Collections.Generic.List[string]]::new()
+    if ($isTrading) { $finalHints.Add('trading') }
+    if (($matched['cybersecurity']).Count -gt 0) { $finalHints.Add('cybersecurity') }
+    if (($matched['fraud']).Count -gt 0) { $finalHints.Add('fraud') }
+    if (($matched['ml']).Count -gt 0) { $finalHints.Add('ml') }
+    if (($matched['agentic']).Count -gt 0) { $finalHints.Add('agentic') }
+    if (($matched['finance']).Count -gt 0) { $finalHints.Add('finance') }
+    if (($matched['automation']).Count -gt 0) { $finalHints.Add('automation') }
+    if (($matched['research']).Count -gt 0) { $finalHints.Add('research') }
+
+    return [PSCustomObject]@{
+        Hints    = $finalHints.ToArray()
+        Evidence = $evidence.ToArray()
+        Matches  = $matched
+    }
 }
 
 # --- detection flags ----------------------------------------------------------
@@ -67,36 +151,66 @@ $hasDockerfile  = (Test-Exists 'Dockerfile') -or (Test-Exists 'backend/Dockerfil
 $hasCompose     = (Test-Exists 'docker-compose.yml') -or (Test-Exists 'docker-compose.yaml')
 $hasWorkflows   = Test-Exists '.github/workflows'
 $hasEnvFile     = (Test-Exists '.env') -or (Test-Exists 'backend/.env') -or (Test-Exists 'frontend/.env')
+
+# Check tests in multiple common locations
 $hasTests       = (Test-Exists 'tests') -or (Test-Exists 'test') -or (Test-Exists 'backend/tests') -or
+                  (Test-Exists 'backend/test') -or (Test-Exists 'frontend/tests') -or (Test-Exists 'frontend/test') -or
                   (Test-Exists '__tests__') -or (Test-Exists 'spec')
-
-# content-based hints
-$mlKeywords      = @('sklearn','torch','tensorflow','keras','xgboost','lightgbm','pandas','numpy',
-                     'notebook','model','dataset','training','inference','mlflow','huggingface','transformers')
-$tradingKeywords = @('broker','order','market','candle','risk','portfolio','strategy','alpaca','ibkr',
-                     'binance','oanda','backtesting','backtest','tick','spread','equity','futures',
-                     'options','trading','exchange','position','fill','slippage')
-$agentKeywords   = @('langchain','crewai','autogen','openai','anthropic','llm','agent','planner',
-                     'memory','tool_call','function_call','embeddings','rag','vectorstore','mcp',
-                     'function_tools','assistant','chat_completion')
-$dbKeywords      = @('postgresql','sqlite','mysql','mongodb','redis','sqlalchemy','prisma',
-                     'sequelize','mongoose','database','migration','orm','diesel','typeorm')
-
-$hasMLHints       = Search-Content $mlKeywords @('py','txt','toml','ipynb')
-$hasTradingHints  = Search-Content $tradingKeywords @('py','js','ts','txt','toml','md')
-$hasAgenticHints  = Search-Content $agentKeywords @('py','js','ts','txt','toml','md','json')
-$hasDatabaseHints = Search-Content $dbKeywords @('py','js','ts','txt','toml','json','sql')
 
 # notebooks
 $hasNotebooks = (Get-ChildItem -Path $ProjectPath -Filter '*.ipynb' -Recurse -ErrorAction SilentlyContinue |
     Measure-Object).Count -gt 0
 
+# Collect domain results
+$domainResults     = Get-DomainHintsAndEvidence
+$DomainHints       = $domainResults.Hints
+
+# Initialize list of detection evidence
+$DetectionEvidence = [System.Collections.Generic.List[string]]::new()
+if ($domainResults.Evidence) {
+    foreach ($ev in $domainResults.Evidence) { $DetectionEvidence.Add($ev) }
+}
+
+# Backward compatibility flags
+$hasTradingHints = $DomainHints -contains 'trading'
+$hasMLHints      = $DomainHints -contains 'ml'
+$hasAgenticHints = $DomainHints -contains 'agentic'
+
+# Database check
+$hasDatabaseHints = $false
+$dbKeywords = @('postgresql','sqlite','mysql','mongodb','redis','sqlalchemy','prisma',
+                 'sequelize','mongoose','database','migration','orm','diesel','typeorm')
+$dbFiles = Get-ChildItem -Path $ProjectPath -Include *.py,*.js,*.ts,*.json,*.sql -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '\\.git|node_modules|venv|\.venv|__pycache__|dist|build|\.next|\.pytest_cache|\.ruff_cache|\.mypy_cache|\.tox' }
+foreach ($file in $dbFiles) {
+    $content = Get-Content $file.FullName -Raw -ErrorAction SilentlyContinue
+    if ($content) {
+        foreach ($kw in $dbKeywords) {
+            if ($content -match "\b$kw\b") { $hasDatabaseHints = $true; break }
+        }
+    }
+    if ($hasDatabaseHints) { break }
+}
+
 # --- backend / frontend paths -------------------------------------------------
 $BackendPath  = ''
 $FrontendPath = ''
 
+# FastAPI imports detection
+$hasFastAPI = $false
+$pyFiles = Get-ChildItem -Path $ProjectPath -Filter "*.py" -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '\\.git|node_modules|venv|\.venv|__pycache__' }
+foreach ($f in $pyFiles) {
+    $c = Get-Content $f.FullName -Raw -ErrorAction SilentlyContinue
+    if ($c -match 'fastapi') {
+        $hasFastAPI = $true
+        $DetectionEvidence.Add("Detected FastAPI import in $(Split-Path $f.FullName -Leaf)")
+        break
+    }
+}
+
 if ($hasPyBackend -or (Test-Exists 'backend')) { $BackendPath = 'backend' }
-elseif ($hasPyRoot)                             { $BackendPath = '.' }
+elseif ($hasPyRoot -or $hasFastAPI)             { $BackendPath = '.' }
 
 if ($hasPkgFront)                              { $FrontendPath = 'frontend' }
 elseif ($hasPkgClient)                         { $FrontendPath = 'client' }
@@ -126,6 +240,7 @@ $PythonCompileCommand = "python -m compileall $pythonCompileRoot -q"
 $PythonTestCommand    = ''
 if ($hasTests) {
     if (Test-Exists 'backend/tests') { $PythonTestCommand = 'pytest backend/tests -q' }
+    elseif (Test-Exists 'backend/test') { $PythonTestCommand = 'pytest backend/test -q' }
     elseif (Test-Exists 'tests')     { $PythonTestCommand = 'pytest tests -q' }
     elseif (Test-Exists 'test')      { $PythonTestCommand = 'pytest test -q' }
     else                             { $PythonTestCommand = 'pytest -q' }
@@ -175,28 +290,37 @@ try {
 } catch { $EnvFilesTracked = $false }
 
 # --- project type ------------------------------------------------------------
-$ProjectType       = 'unknown'
-$RecommendedPreset = 'unknown'
-
-$hasAnyPython = $hasPyRoot -or $hasPyBackend
+$hasAnyPython = $hasPyRoot -or $hasPyBackend -or $hasFastAPI
 $hasAnyNode   = $hasPkgRoot -or $hasPkgFront -or $hasPkgClient
 
-if ($hasTradingHints -and $hasAnyPython) {
-    $ProjectType = 'trading-system'; $RecommendedPreset = 'trading-system'
-} elseif ($hasAgenticHints -and $hasAnyPython) {
-    $ProjectType = 'agentic-ai'; $RecommendedPreset = 'agentic-ai'
-} elseif (($hasMLHints -or $hasNotebooks) -and $hasAnyPython) {
-    $ProjectType = 'ml-project'; $RecommendedPreset = 'ml-project'
-} elseif ($hasAnyPython -and $hasAnyNode) {
-    $ProjectType = 'fullstack'; $RecommendedPreset = 'fullstack'
-} elseif ($hasAnyPython -and -not $hasAnyNode) {
-    $ProjectType = 'python-backend'; $RecommendedPreset = 'python-backend'
-} elseif ($hasAnyNode -and -not $hasAnyPython) {
-    $ProjectType = 'node-frontend'; $RecommendedPreset = 'node-frontend'
-} elseif ($hasIndexHtml -and -not $hasAnyNode -and -not $hasAnyPython) {
-    $ProjectType = 'static-website'; $RecommendedPreset = 'static-website'
-} elseif ($hasMLHints -or $hasNotebooks) {
-    $ProjectType = 'data-science'; $RecommendedPreset = 'ml-project'
+$ProjectType = 'unknown'
+
+if ($hasAnyPython -and $hasAnyNode) {
+    $ProjectType = 'fullstack'
+} elseif ($hasAnyPython) {
+    if ($hasMLHints -and $hasNotebooks -and (-not $hasFastAPI) -and (-not (Test-Exists 'backend/app')) -and (-not (Test-Exists 'src'))) {
+        $ProjectType = 'ml-project'
+    } elseif ($hasAgenticHints -and (-not $hasFastAPI) -and (-not (Test-Exists 'backend/app')) -and (-not (Test-Exists 'src'))) {
+        $ProjectType = 'agentic-ai'
+    } else {
+        $ProjectType = 'python-backend'
+    }
+} elseif ($hasAnyNode) {
+    $ProjectType = 'node-frontend'
+} elseif ($hasIndexHtml) {
+    $ProjectType = 'static-website'
+} elseif ($hasNotebooks) {
+    $ProjectType = 'data-science'
+}
+
+$RecommendedPreset = $ProjectType
+
+# Confidence
+$Confidence = 'low'
+if ($hasTests -and ($BackendPath -ne '' -or $FrontendPath -ne '')) {
+    $Confidence = 'high'
+} elseif ($BackendPath -ne '' -or $FrontendPath -ne '' -or $hasAnyPython -or $hasAnyNode) {
+    $Confidence = 'medium'
 }
 
 # --- risk notes --------------------------------------------------------------
@@ -241,6 +365,9 @@ $result = [ordered]@{
     HasTradingHints       = $hasTradingHints
     HasAgenticHints       = $hasAgenticHints
     RiskNotes             = $RiskNotes.ToArray()
+    DomainHints           = $DomainHints
+    DetectionEvidence     = $DetectionEvidence.ToArray()
+    Confidence            = $Confidence
 }
 
 if ($Json) {
@@ -253,6 +380,13 @@ if ($Json) {
     Write-Host "  Path          : $ProjectPath"
     Write-Host "  Project Type  : $($result.ProjectType)"   -ForegroundColor Yellow
     Write-Host "  Preset        : $($result.RecommendedPreset)" -ForegroundColor Yellow
+    Write-Host "  Domain Hints  : $($result.DomainHints -join ', ')" -ForegroundColor Yellow
+    Write-Host "  Confidence    : $($result.Confidence)" -ForegroundColor Yellow
+    Write-Host ''
+    Write-Host '  Detection Evidence ---------------------------------'
+    foreach ($ev in $result.DetectionEvidence) {
+        Write-Host "    - $ev" -ForegroundColor Gray
+    }
     Write-Host ''
     Write-Host '  Python ---------------------------------------------'
     Write-Host "  Dep File      : $(if($result.PythonDependencyFile){$result.PythonDependencyFile}else{'none'})"
