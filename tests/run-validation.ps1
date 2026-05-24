@@ -193,23 +193,62 @@ Test-Step "Public-Safety Scan" {
     }
 }
 
-# 12. Verify Preset Synchronization
-Test-Step "Verify Preset Synchronization" {
+# 12. Verify Preset Synchronization and Regression Tests
+Test-Step "Verify Preset Synchronization and Regression Tests" {
     # Test valid preset python-backend succeeds
     $res1 = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\apply-ai-workspace.ps1") -ScriptArgs @("-Preset", "python-backend", "-DryRun")
     Assert-Equal $res1.ExitCode 0 "apply-ai-workspace.ps1 -Preset python-backend should succeed"
 
-    # Test invalid preset fails parameter validation
+    # Test invalid preset fails cleanly
     $res2 = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\apply-ai-workspace.ps1") -ScriptArgs @("-Preset", "invalid-preset-xyz")
-    Assert-Contains $res2.Output "Cannot validate argument on parameter 'Preset'" "apply-ai-workspace.ps1 should throw validation error for invalid preset"
+    Assert-Contains $res2.Output "Invalid preset" "apply-ai-workspace.ps1 should throw validation error for invalid preset"
 
     # Test generate-ci.ps1 with invalid preset
     $res3 = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\generate-ci.ps1") -ScriptArgs @("-Preset", "invalid-preset-xyz")
-    Assert-Contains $res3.Output "Cannot validate argument on parameter 'Preset'" "generate-ci.ps1 should throw validation error for invalid preset"
+    Assert-Contains $res3.Output "Invalid preset" "generate-ci.ps1 should throw validation error for invalid preset"
 
     # Test new-project.ps1 with invalid preset
     $res4 = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\new-project.ps1") -ScriptArgs @("-Preset", "invalid-preset-xyz")
-    Assert-Contains $res4.Output "Cannot validate argument on parameter 'Preset'" "new-project.ps1 should throw validation error for invalid preset"
+    Assert-Contains $res4.Output "Invalid preset" "new-project.ps1 should throw validation error for invalid preset"
+
+    # Regression: apply-ai-workspace.ps1 runs with auto on trading fixture in DryRun
+    $argsList = @(
+        "-ProjectPath", $TradingFixture,
+        "-Preset", "auto",
+        "-IncludeCI",
+        "-IncludeSecretScan",
+        "-IncludePrompts",
+        "-IncludeDocs",
+        "-GenerateProjectMap",
+        "-Backup",
+        "-DryRun"
+    )
+    $resTrading = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\apply-ai-workspace.ps1") -ScriptArgs $argsList
+    Assert-Equal $resTrading.ExitCode 0 "Trading backend apply with auto and DryRun should succeed"
+    Assert-Contains $resTrading.Output "DRY RUN complete. No files written." "Output should confirm DryRun completed"
+    Assert-NotContains $resTrading.Output "Invalid preset" "Trading backend apply should not throw preset errors"
+
+    # Regression: dry-run must write NO files to destination
+    $mapFile = Join-Path $TradingFixture "PROJECT_MAP.md"
+    $ciFile = Join-Path $TradingFixture ".github\workflows\ci.yml"
+    Assert-Equal (Test-Path $mapFile) $false "DryRun must not write PROJECT_MAP.md"
+    Assert-Equal (Test-Path $ciFile) $false "DryRun must not write ci.yml"
+
+    # Verify generate-ci.ps1 accepts valid presets: python-backend, fullstack, trading-system, unknown, auto
+    $presetsToTest = @('python-backend', 'fullstack', 'trading-system', 'unknown', 'auto')
+    foreach ($p in $presetsToTest) {
+        $resCI = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\generate-ci.ps1") -ScriptArgs @("-ProjectPath", $TradingFixture, "-Preset", $p, "-DryRun")
+        Assert-Equal $resCI.ExitCode 0 "generate-ci.ps1 should accept preset '$p'"
+    }
+
+    # Verify atomic apply: preflight catches bad preset before writing anything
+    # We will run a non-dryrun command with an invalid preset and verify no files are written
+    $resBadApply = Invoke-PS1 -File (Join-Path $RepoRoot "scripts\apply-ai-workspace.ps1") -ScriptArgs @("-ProjectPath", $TradingFixture, "-Preset", "bad-preset-xyz")
+    if ($resBadApply.ExitCode -eq 0) {
+        throw "Assertion Failed: Bad preset should fail execution (Expected non-zero exit code, Got '0')"
+    }
+    Assert-Equal (Test-Path $mapFile) $false "Preflight failure must prevent writing PROJECT_MAP.md"
+    Assert-Equal (Test-Path $ciFile) $false "Preflight failure must prevent writing ci.yml"
 }
 
 # --- summary --------------------------------------------------------------------

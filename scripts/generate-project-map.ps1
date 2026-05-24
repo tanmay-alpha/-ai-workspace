@@ -46,9 +46,12 @@ if (-not $NoWrite) {
     Write-Host "Analyzing project: $ProjectPath" -ForegroundColor Cyan
 }
 
-# --- run detection ------------------------------------------------------------
 if (Test-Path $DetectScript) {
-    $detection = & $DetectScript -ProjectPath $ProjectPath -Json | ConvertFrom-Json
+    $detectParams = @{
+        ProjectPath = $ProjectPath
+        Json        = $true
+    }
+    $detection = & $DetectScript @detectParams | ConvertFrom-Json
 } else {
     Write-Warning 'detect-project.ps1 not found. Using basic detection.'
     $detection = [PSCustomObject]@{

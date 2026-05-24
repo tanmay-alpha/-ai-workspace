@@ -48,7 +48,7 @@ function Get-DomainHintsAndEvidence {
     $domains = @{
         'trading' = @('angel', 'smartapi', 'zerodha', 'kiteconnect', 'upstox', 'fyers', 'aliceblue', 'dhan',
                       'ohlcv', 'candle', 'tick', 'instrument token', 'order placement', 'paper trading',
-                      'live trading', 'TRADING_MODE', 'KITE_API', 'fyers_api')
+                      'live trading', 'TRADING_MODE', 'KITE_API', 'fyers_api', 'broker', 'market', 'strategy', 'execution')
         'cybersecurity' = @('cybersecurity', 'docshield', 'sentinel', 'abuse', 'phish', 'threat',
                              'exploit', 'vulnerability', 'firewall', 'malware', 'antivirus', 'sandbox')
         'fraud' = @('fraud', 'risk', 'phish', 'detector', 'scam', 'metadata', 'analytics', 'audit')
@@ -102,8 +102,8 @@ function Get-DomainHintsAndEvidence {
 
     # 3. Analyze trading points
     $tradingPoints = 0
-    $brokers = @('angel', 'smartapi', 'zerodha', 'kiteconnect', 'upstox', 'fyers', 'aliceblue', 'dhan')
-    $terms   = @('ohlcv', 'candle', 'tick', 'instrument token', 'order placement', 'paper trading', 'live trading')
+    $brokers = @('angel', 'smartapi', 'zerodha', 'kiteconnect', 'upstox', 'fyers', 'aliceblue', 'dhan', 'broker')
+    $terms   = @('ohlcv', 'candle', 'tick', 'instrument token', 'order placement', 'paper trading', 'live trading', 'market', 'strategy', 'execution')
     $configs = @('TRADING_MODE', 'KITE_API', 'fyers_api')
 
     $hasBroker = $false

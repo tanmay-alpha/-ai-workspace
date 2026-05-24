@@ -24,16 +24,6 @@ param (
 
     [string]$ProjectName = '',
 
-    [ValidateScript({
-        $jsonPath = Join-Path $PSScriptRoot "presets.json"
-        if (-not (Test-Path $jsonPath)) {
-            $canonical = @('unknown', 'python-backend', 'node-frontend', 'fullstack', 'static-website', 'ml-project', 'agentic-ai', 'trading-system', 'data-science')
-        } else {
-            $canonical = Get-Content $jsonPath -Raw | ConvertFrom-Json
-        }
-        if ($_ -in $canonical) { return $true }
-        throw "Invalid preset '$_'. Valid presets are: $($canonical -join ', ')"
-    })]
     [string]$Preset = 'python-backend',
 
     [switch]$DryRun,
@@ -42,6 +32,27 @@ param (
 
 $ErrorActionPreference = 'Stop'
 $WorkspaceRoot = Split-Path -Parent $PSScriptRoot
+
+function Get-ValidPresets {
+    $jsonPath = Join-Path $PSScriptRoot "presets.json"
+    if (Test-Path $jsonPath) {
+        return (Get-Content $jsonPath -Raw | ConvertFrom-Json)
+    }
+    return @('auto', 'unknown', 'python-backend', 'node-frontend', 'fullstack', 'static-website', 'ml-project', 'agentic-ai', 'trading-system', 'data-science')
+}
+
+function Assert-ValidPreset([string]$p) {
+    $valid = Get-ValidPresets
+    if ($p -notin $valid) {
+        throw "Invalid preset '$p'. Valid presets are: $($valid -join ', ')"
+    }
+}
+
+if ($Preset -eq 'auto') {
+    throw "Cannot use 'auto' preset when scaffolding a new project. Please specify a concrete preset."
+}
+
+Assert-ValidPreset $Preset
 
 if (-not $ProjectName) { $ProjectName = Split-Path $ProjectPath -Leaf }
 
@@ -228,21 +239,21 @@ Write-Host ''
 Write-Host '  Applying ai-workspace context files...' -ForegroundColor Cyan
 $ApplyScript = Join-Path $WorkspaceRoot 'scripts\apply-ai-workspace.ps1'
 if (Test-Path $ApplyScript) {
-    $applyArgs = @(
-        '-ProjectPath', $ProjectPath,
-        '-Preset', $Preset,
-        '-IncludeCI',
-        '-IncludeSecretScan',
-        '-IncludePrompts',
-        '-IncludeDocs',
-        '-GenerateProjectMap',
-        '-IncludeADR',
-        '-IncludeAgentRules',
-        '-IncludeGitHubTemplates'
-    )
-    if ($DryRun) { $applyArgs += '-DryRun' }
-    if ($Force)  { $applyArgs += '-Force' }
-    & $ApplyScript @applyArgs
+    $applyParams = @{
+        ProjectPath            = $ProjectPath
+        Preset                 = $Preset
+        IncludeCI              = $true
+        IncludeSecretScan      = $true
+        IncludePrompts         = $true
+        IncludeDocs            = $true
+        GenerateProjectMap     = $true
+        IncludeADR             = $true
+        IncludeAgentRules      = $true
+        IncludeGitHubTemplates = $true
+    }
+    if ($DryRun) { $applyParams.DryRun = $true }
+    if ($Force)  { $applyParams.Force  = $true }
+    & $ApplyScript @applyParams
 } else {
     Write-Host '  apply-ai-workspace.ps1 not found - skipping context files.' -ForegroundColor Yellow
 }

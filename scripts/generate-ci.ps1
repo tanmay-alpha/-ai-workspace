@@ -27,16 +27,6 @@ param (
 
     [string]$OutputPath = '',
 
-    [ValidateScript({
-        $jsonPath = Join-Path $PSScriptRoot "presets.json"
-        if (-not (Test-Path $jsonPath)) {
-            $canonical = @('unknown', 'python-backend', 'node-frontend', 'fullstack', 'static-website', 'ml-project', 'agentic-ai', 'trading-system', 'data-science')
-        } else {
-            $canonical = Get-Content $jsonPath -Raw | ConvertFrom-Json
-        }
-        if ($_ -eq 'auto' -or $_ -in $canonical) { return $true }
-        throw "Invalid preset '$_'. Valid presets are: auto, $($canonical -join ', ')"
-    })]
     [string]$Preset = 'auto',
 
     [switch]$Force,
@@ -45,6 +35,23 @@ param (
 )
 
 $ErrorActionPreference = 'Stop'
+
+function Get-ValidPresets {
+    $jsonPath = Join-Path $PSScriptRoot "presets.json"
+    if (Test-Path $jsonPath) {
+        return (Get-Content $jsonPath -Raw | ConvertFrom-Json)
+    }
+    return @('auto', 'unknown', 'python-backend', 'node-frontend', 'fullstack', 'static-website', 'ml-project', 'agentic-ai', 'trading-system', 'data-science')
+}
+
+function Assert-ValidPreset([string]$p) {
+    $valid = Get-ValidPresets
+    if ($p -notin $valid) {
+        throw "Invalid preset '$p'. Valid presets are: $($valid -join ', ')"
+    }
+}
+
+Assert-ValidPreset $Preset
 
 if (-not (Test-Path $ProjectPath)) {
     Write-Error "ProjectPath does not exist: $ProjectPath"
@@ -68,9 +75,14 @@ if (-not $DryRun) {
     Write-Host "Detecting project: $ProjectPath" -ForegroundColor Cyan
 }
 
-$d = & $DetectScript -ProjectPath $ProjectPath -Json | ConvertFrom-Json
+$detectParams = @{
+    ProjectPath = $ProjectPath
+    Json        = $true
+}
+$d = & $DetectScript @detectParams | ConvertFrom-Json
 
 $effectivePreset = if ($Preset -ne 'auto') { $Preset } else { $d.RecommendedPreset }
+Assert-ValidPreset $effectivePreset
 
 if (-not $DryRun) {
     Write-Host "Effective preset : $effectivePreset" -ForegroundColor Yellow
